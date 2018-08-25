@@ -1,8 +1,6 @@
 from django.apps import AppConfig
 from django.utils.translation import ugettext_lazy as _
 
-from .channels.receivers import load_location_receivers
-
 
 class LociConfig(AppConfig):
     name = 'django_loci'
@@ -19,7 +17,3 @@ class LociConfig(AppConfig):
         import leaflet
         leaflet.app_settings['NO_GLOBALS'] = False
         self.__setmodels__()
-        self._load_receivers()
-
-    def _load_receivers(self):
-        load_location_receivers(sender=self.location_model)

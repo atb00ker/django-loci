@@ -1,4 +1,4 @@
-from channels.test import WSClient
+from channels.testing import HttpCommunicator
 from django.contrib.auth.models import Permission
 
 from .. import TestAdminMixin, TestLociMixin
@@ -7,7 +7,7 @@ from ...channels.base import _get_object_or_none
 
 class BaseTestChannels(TestAdminMixin, TestLociMixin):
     def setUp(self):
-        client = WSClient()
+        client = HttpCommunicator()
         self.client = client
 
     def test_object_or_none(self):

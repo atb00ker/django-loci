@@ -1,6 +1,6 @@
-from channels import Group
-from channels.generic.websockets import WebsocketConsumer
+from channels.generic.websocket import WebsocketConsumer    
 from django.core.exceptions import ValidationError
+from asgiref.sync import async_to_sync
 
 location_broadcast_path = r'^/ws/loci/location/(?P<pk>[^/]+)/$'
 
@@ -25,7 +25,10 @@ class BaseLocationBroadcast(WebsocketConsumer):
             message.reply_channel.send({'close': True})
             return
         message.reply_channel.send({'accept': True})
-        Group('loci.mobile-location.{0}'.format(pk)).add(message.reply_channel)
+        async_to_sync(self.channel_layer.group_add)(
+            'loci.mobile-location.{0}'.format(pk), 
+            message.reply_channel
+        )
 
     def is_authorized(self, user, location):
         perm = '{0}.change_location'.format(self.model._meta.app_label)
@@ -39,8 +42,25 @@ class BaseLocationBroadcast(WebsocketConsumer):
             )
         )
 
+    def update_mobile_location(self, sender, instance, **kwargs):
+        if not kwargs.get('created') and instance.geometry:
+            group_name = 'loci.mobile-location.{0}'.format(str(instance.pk))
+            message = {'text': instance.geometry.geojson}
+            async_to_sync(self.channel_layer.group_send)(
+                group_name,
+                {
+                    "type": "chat.message",
+                    "text": message,
+                },
+                immediately=True,
+            )
+
+    
     def disconnect(self, message, pk):
         """
         Perform things on connection close
         """
-        Group('loci.mobile-location.{0}'.format(pk)).discard(message.reply_channel)
+        async_to_sync(self.channel_layer.group_discard)(
+            'loci.mobile-location.{0}'.format(pk), 
+            message.reply_channel
+        )
