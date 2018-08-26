@@ -1,8 +1,9 @@
-from channels.generic.websocket import WebsocketConsumer    
+from channels.generic.websocket import WebsocketConsumer
+# from channels.consumer import SyncConsumer    
 from django.core.exceptions import ValidationError
 from asgiref.sync import async_to_sync
 
-location_broadcast_path = r'^/ws/loci/location/(?P<pk>[^/]+)/$'
+location_broadcast_path = r'^ws/loci/location/(?P<pk>[^/]+)/$'
 
 
 def _get_object_or_none(model, **kwargs):
@@ -18,17 +19,17 @@ class BaseLocationBroadcast(WebsocketConsumer):
     to authorized users (superusers or organization operators)
     """
     http_user = True
-
-    def connect(self, message, pk):
-        location = _get_object_or_none(self.model, pk=pk)
-        if not location or not self.is_authorized(message.user, location):
-            message.reply_channel.send({'close': True})
+    def websocket_connect(self, message):
+        user = self.scope["user"]
+        self.pk = self.scope['url_route']['kwargs']['pk']
+        location = _get_object_or_none(self.model, pk=self.pk)
+        if not location or not self.is_authorized(user, location):
             return
-        message.reply_channel.send({'accept': True})
         async_to_sync(self.channel_layer.group_add)(
-            'loci.mobile-location.{0}'.format(pk), 
-            message.reply_channel
+            'loci.mobile-location.{0}'.format(self.pk), 
+            self.channel_name
         )
+        self.accept()
 
     def is_authorized(self, user, location):
         perm = '{0}.change_location'.format(self.model._meta.app_label)
@@ -42,25 +43,11 @@ class BaseLocationBroadcast(WebsocketConsumer):
             )
         )
 
-    def update_mobile_location(self, sender, instance, **kwargs):
-        if not kwargs.get('created') and instance.geometry:
-            group_name = 'loci.mobile-location.{0}'.format(str(instance.pk))
-            message = {'text': instance.geometry.geojson}
-            async_to_sync(self.channel_layer.group_send)(
-                group_name,
-                {
-                    "type": "chat.message",
-                    "text": message,
-                },
-                immediately=True,
-            )
-
-    
-    def disconnect(self, message, pk):
+    def websocket_disconnect(self, message):
         """
         Perform things on connection close
         """
         async_to_sync(self.channel_layer.group_discard)(
-            'loci.mobile-location.{0}'.format(pk), 
-            message.reply_channel
+            'loci.mobile-location.{0}'.format(self.pk), 
+            self.channel_name
         )

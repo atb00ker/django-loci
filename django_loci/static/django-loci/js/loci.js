@@ -335,8 +335,9 @@ django.jQuery(function ($) {
     // websocket for mobile coords
     function listenForLocationUpdates(pk) {
         var host = window.location.host,
-            protocol = window.location.protocol === 'http' ? 'ws' : 'wss',
-            ws = new WebSocket(protocol + '://' + host + '/ws/loci/location/' + pk + '/');
+            // protocol = window.location.protocol === 'http' ? 'ws' : 'wss',
+            // ws = new WebSocket(protocol + '://' + host + '/ws/loci/location/' + pk + '/');
+            ws = new WebSocket('ws://' + host + '/ws/loci/location/' + pk + '/');
         console.log("AyeBye")
         ws.onmessage = function (e) {
             $geometryRow.show();
