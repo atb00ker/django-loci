@@ -5,6 +5,7 @@ import os
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.utils import DatabaseError,IntegrityError
 
 
 class TestLociMixin(object):
@@ -77,9 +78,12 @@ class TestAdminMixin(object):
         return 'admin:{0}'.format(self.object_model._meta.app_label)
 
     def _create_admin(self):
-        return self.user_model.objects.create_superuser(username='admin',
+        try:
+            return self.user_model.objects.create_superuser(username='admin',
                                                         password='admin',
                                                         email='admin@email.org')
+        except IntegrityError:
+            return self.user_model.objects.get(username='admin')
 
     def _login_as_admin(self):
         admin = self._create_admin()

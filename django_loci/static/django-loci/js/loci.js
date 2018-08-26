@@ -331,16 +331,17 @@ django.jQuery(function ($) {
             alert(gettext('Please set the indoor position before saving'));
         }
     });
-
     // websocket for mobile coords
     function listenForLocationUpdates(pk) {
         var host = window.location.host,
             protocol = window.location.protocol === 'http' ? 'ws' : 'wss',
-            ws = new WebSocket(protocol + '://' + host + '/ws/loci/location/' + pk + '/');
+            // ws = new WebSocket(protocol + '://' + host + '/ws/loci/location/' + pk + '/');
+            ws = new WebSocket('ws://' + host + '/ws/loci/location/' + pk + '/');
         ws.onmessage = function (e) {
+            var mapData = JSON.parse(e.data);
             $geometryRow.show();
             $noLocationDiv.hide();
-            $geometryTextarea.val(e.data);
+            $geometryTextarea.val(mapData['text']);
             getMap().remove();
             window[loadMapName]();
         };

@@ -1,0 +1,8 @@
+[
+  "django_loci/tests/pytest_channels.py::TestChannels::()::test_object_or_none",
+  "django_loci/tests/pytest_channels.py::TestChannels::()::test_consumer_unauthenticated",
+  "django_loci/tests/pytest_channels.py::TestChannels::()::test_connect_admin",
+  "django_loci/tests/pytest_channels.py::TestChannels::()::test_consumer_not_staff",
+  "django_loci/tests/pytest_channels.py::TestChannels::()::test_consumer_404",
+  "django_loci/tests/pytest_channels.py::TestChannels::()::test_consumer_staff_but_no_change_permission"
+]
