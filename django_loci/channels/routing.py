@@ -1,4 +1,19 @@
-from .base import location_broadcast_path
-from .consumers import LocationBroadcast
+from django.conf.urls import url
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from channels.security.websocket import AllowedHostsOriginValidator, OriginValidator
+from django_loci.channels.base import location_broadcast_path
+from django_loci.channels.consumers import LocationBroadcast
 
-channel_routing = [LocationBroadcast.as_route(path=location_broadcast_path)]
+
+channel_routing = ProtocolTypeRouter({
+    'websocket': AllowedHostsOriginValidator(
+        AuthMiddlewareStack(
+            URLRouter(
+                [
+                    url(location_broadcast_path, LocationBroadcast, name='LocationChannel')
+                ]
+            )
+        ),
+    )
+})
