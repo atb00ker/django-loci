@@ -1,8 +1,10 @@
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+import json
+
 import channels.layers
 from asgiref.sync import async_to_sync
-import json
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 def update_mobile_location(sender, instance, **kwargs):
     if not kwargs.get('created') and instance.geometry:
@@ -17,8 +19,6 @@ def update_mobile_location(sender, instance, **kwargs):
                 'message': json_message
             }
         )
-
-
 
 
 def load_location_receivers(sender):

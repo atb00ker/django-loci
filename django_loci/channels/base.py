@@ -1,6 +1,6 @@
+from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from django.core.exceptions import ValidationError
-from asgiref.sync import async_to_sync
 
 location_broadcast_path = r'^ws/loci/location/(?P<pk>[^/]+)/$'
 
@@ -20,11 +20,12 @@ class BaseLocationBroadcast(WebsocketConsumer):
     http_user = True
 
     def connect(self):
+        self.pk = None
         try:
             user = self.scope["user"]
             self.pk = self.scope['url_route']['kwargs']['pk']
         except Exception:
-            # Will fall here when the scope does not have 
+            # Will fall here when the scope does not have
             # one of the variables, most commonly, user
             # (When a user tries to access without loggin in)
             self.close()
@@ -34,7 +35,7 @@ class BaseLocationBroadcast(WebsocketConsumer):
             return
         self.accept()
         async_to_sync(self.channel_layer.group_add)(
-            'loci.mobile-location.{0}'.format(self.pk), 
+            'loci.mobile-location.{0}'.format(self.pk),
             self.channel_name
         )
 
@@ -58,6 +59,6 @@ class BaseLocationBroadcast(WebsocketConsumer):
         Perform things on connection close
         """
         async_to_sync(self.channel_layer.group_discard)(
-            'loci.mobile-location.{0}'.format(self.pk), 
+            'loci.mobile-location.{0}'.format(self.pk),
             self.channel_name
         )
