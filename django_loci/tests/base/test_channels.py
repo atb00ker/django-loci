@@ -134,15 +134,15 @@ class BaseTestChannels(TestAdminMixin, TestLociMixin):
         await communicator.disconnect()
 
         # Fix Me! I am not working!
-        @pytest.mark.asyncio
-        @pytest.mark.django_db(transaction=True)
-        async def test_location_update(self):
-            test_user = self._create_admin()
-            request_vars = self._get_request_dict(user=test_user)
-            communicator = self._get_communicator(request_vars, test_user)
-            connected, _ = await communicator.connect()
-            assert connected
-            # loc = self.location_model.objects.get(pk=res['pk'])
-            # loc.geometry = 'POINT (12.513124 41.897903)'
-            # loc.save()
-            await communicator.disconnect()
+        # @pytest.mark.asyncio
+        # @pytest.mark.django_db(transaction=True)
+        # async def test_location_update(self):
+        #     test_user = self._create_admin()
+        #     request_vars = self._get_request_dict(user=test_user)
+        #     communicator = self._get_communicator(request_vars, test_user)
+        #     connected, _ = await communicator.connect()
+        #     assert connected
+        #     loc = self.location_model.objects.get(pk=res['pk'])
+        #     loc.geometry = 'POINT (12.513124 41.897903)'
+        #     loc.save()
+        #     await communicator.disconnect()
